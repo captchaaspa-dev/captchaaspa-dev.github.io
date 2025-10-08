@@ -5,15 +5,15 @@
   xmlns:mailappor="http://schemas.microsoft.com/office/mailappversionoverrides" xsi:type="MailApp">
   <Id>{C341AD31-BF7A-4C1D-99F1-D2E5896BEB0A}</Id>
   <Version>1.0</Version>
-  <ProviderName>Contoso</ProviderName>
-  <DefaultLocale>en-us</DefaultLocale>
-  <DisplayName DefaultValue="Office Add-ins signature sample"/>
-  <Description DefaultValue="Insert your signature with ease."/>
+  <ProviderName>Colaboras Cloud</ProviderName>
+  <DefaultLocale>es-es</DefaultLocale>
+  <DisplayName DefaultValue="Colaboras Cloud Add-in"/>
+  <Description DefaultValue="Ejemplo de gestión remota del entorno Colaboras."/>
   <IconUrl DefaultValue="https://captchaaspa-dev.github.io/assets/colaboras.png"/>
   <HighResolutionIconUrl DefaultValue="https://captchaaspa-dev.github.io/assets/colaboras.jpg"/>
   <SupportUrl DefaultValue="https://www.contoso.com/help"/>
   <AppDomains>
-    <AppDomain>https://www.contoso.com</AppDomain>
+    <AppDomain>https://www.colaboras.cloud</AppDomain>
   </AppDomains>
   <Hosts>
     <Host Name="Mailbox"/>
@@ -57,7 +57,8 @@
         <!-- For more information, see https://learn.microsoft.com/office/dev/add-ins/outlook/autolaunch -->
           <Runtimes>
             <Runtime resid="Autorun">
-              <Override type="javascript" resid="runtimeJs"/>
+              <!--<Override type="javascript" resid="runtimeJs"/>-->
+              <Override type="javascript" resid="runtimeJsColaboras"/>
             </Runtime>
           </Runtimes>
 
@@ -113,10 +114,13 @@
             <!-- Specify function to call for new message and new appointment events -->
             <ExtensionPoint xsi:type="LaunchEvent">
               <LaunchEvents>
+                <!--
                 <LaunchEvent Type="OnNewMessageCompose" FunctionName="checkSignature" />
                 <LaunchEvent Type="OnNewAppointmentOrganizer" FunctionName="checkSignature" />
+                -->
+                <LaunchEvent Type="OnNewAppointmentOrganizer" FunctionName="colaborasInit" />
               </LaunchEvents>
-              <SourceLocation resid="Autorun" />
+              <SourceLocation resid="autorunWebColaboras" />
             </ExtensionPoint>
 
           </DesktopFormFactor>
@@ -130,6 +134,8 @@
           <bt:Url id="residUrl0" DefaultValue="https://captchaaspa-dev.github.io/src/taskpane/HTML/editsignature.html"></bt:Url>
           <bt:Url id="Autorun" DefaultValue="https://captchaaspa-dev.github.io/src/runtime/HTML/autorunweb.html"></bt:Url>
           <bt:Url id="runtimeJs" DefaultValue="https://captchaaspa-dev.github.io/src/runtime/Js/autorunshared.js"></bt:Url>
+          <bt:Url id="runtimeJsColaboras" DefaultValue="https://captchaaspa-dev.github.io/src/runtime/Js/clbautorunshared.js"></bt:Url>
+          <bt:Url id="autorunWebColaboras" DefaultValue="https://captchaaspa-dev.github.io/src/runtime/HTML/clbautorunweb.html"></bt:Url>
           <bt:Url id="newTalkRoomUrl" DefaultValue="https://captchaaspa-dev.github.io/src/taskpane/HTML/newtalkroom.html"></bt:Url>
         </bt:Urls>
         <bt:ShortStrings>
