@@ -62,6 +62,7 @@
           </Runtimes>
 
           <DesktopFormFactor>
+            <!--
             <ExtensionPoint xsi:type="MessageComposeCommandSurface">
               <OfficeTab id="TabDefault">
                 <Group id="mccsG0">
@@ -84,16 +85,17 @@
                 </Group>
               </OfficeTab>
             </ExtensionPoint>
+            -->
 
             <ExtensionPoint xsi:type="AppointmentOrganizerCommandSurface">
               <OfficeTab id="TabDefault">
                 <Group id="aocsG0">
-                  <Label resid="residGL0"/>
+                  <Label resid="ColaborasInjectorId"/>
                   <Control xsi:type="Button" id="MRCS_TpBtn1">
-                    <Label resid="residStr0"/>
+                    <Label resid="CreateNewTalkRoomLabel"/>
                     <Supertip>
-                      <Title resid="residStr0"/>
-                      <Description resid="residTT0"/>
+                      <Title resid="CreateNewTalkRoomLabel"/>
+                      <Description resid="CreateNewTalkRoomDescription"/>
                     </Supertip>
                     <Icon>
                       <bt:Image size="16" resid="Icon16x16" />
@@ -101,7 +103,7 @@
                       <bt:Image size="80" resid="Icon16x16" />
                     </Icon>
                     <Action xsi:type="ShowTaskpane">
-                      <SourceLocation resid="residUrl0"/>
+                      <SourceLocation resid="newTalkRoomUrl"/>
                     </Action>
                   </Control>
                 </Group>
@@ -128,14 +130,19 @@
           <bt:Url id="residUrl0" DefaultValue="https://captchaaspa-dev.github.io/src/taskpane/HTML/editsignature.html"></bt:Url>
           <bt:Url id="Autorun" DefaultValue="https://captchaaspa-dev.github.io/src/runtime/HTML/autorunweb.html"></bt:Url>
           <bt:Url id="runtimeJs" DefaultValue="https://captchaaspa-dev.github.io/src/runtime/Js/autorunshared.js"></bt:Url>
+          <bt:Url id="newTalkRoomUrl" DefaultValue="https://captchaaspa-dev.github.io/src/taskpane/HTML/newtalkroom.html"></bt:Url>
         </bt:Urls>
         <bt:ShortStrings>
           <bt:String id="residGL0" DefaultValue="Signature Injector"></bt:String>
           <bt:String id="residStr0" DefaultValue="Set my signature"></bt:String>
+          <bt:String id="ColaborasInjectorId" DefaultValue="Colaboras Injector"></bt:String>
+          <bt:String id="CreateNewTalkRoomLabel" DefaultValue="Crear nueva sala Talk"></bt:String>
+          
         </bt:ShortStrings>
         <bt:LongStrings>
           <bt:String id="residAppDesc" DefaultValue="Insert your signature with ease."></bt:String>
           <bt:String id="residTT0" DefaultValue="Opens a pane displaying all available properties."></bt:String>
+          <bt:String id="CreateNewTalkRoomDescription" DefaultValue="Abre un panel para crear una sala Talk remota."></bt:String>
         </bt:LongStrings>
       </Resources>
     </VersionOverrides>
