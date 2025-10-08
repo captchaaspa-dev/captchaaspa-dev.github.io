@@ -4,8 +4,8 @@ const devCerts = require("office-addin-dev-certs");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
-const urlDev = "https://captchaaspa-dev.github.io";
-const urlProd = "https://captchaaspa-dev.github.io"; // CHANGE THIS TO YOUR PRODUCTION DEPLOYMENT LOCATION
+const urlDev = "https://localhost:3000";
+const urlProd = "https://www.contoso.com"; // CHANGE THIS TO YOUR PRODUCTION DEPLOYMENT LOCATION
 
 async function getHttpsOptions() {
   const httpsOptions = await devCerts.getHttpsServerOptions();
@@ -18,8 +18,9 @@ module.exports = async (env, options) => {
     devtool: "source-map",
     entry: {
       polyfill: ["core-js/stable", "regenerator-runtime/runtime"],
-      newtalkroompane: ["./src/taskpane/HTML/newtalkroom.html"],
-      autorun: ["./src/runtime/Js/clbautorunshared.js", "./src/runtime/HTML/clbautorunweb.html"],
+      assignpane: ["./src/taskpane/Js/taskpane_main.js", "./src/taskpane/HTML/assignsignature.html"],
+      editpane: ["./src/taskpane/HTML/editsignature.html"],
+      autorun: ["./src/runtime/Js/autorunshared.js", "./src/runtime/HTML/autorunweb.html"],
     },
     output: {
       clean: true,
@@ -55,13 +56,18 @@ module.exports = async (env, options) => {
     },
     plugins: [
       new HtmlWebpackPlugin({
-        filename: "newtalkroom.html",
-        template: "./src/taskpane/HTML/newtalkroom.html",
-        chunks: ["polyfill", "newtalkroompane"],
+        filename: "editsignature.html",
+        template: "./src/taskpane/HTML/editsignature.html",
+        chunks: ["polyfill", "editpane"],
       }),
       new HtmlWebpackPlugin({
-        filename: "clbautorunweb.html",
-        template: "./src/runtime/HTML/clbautorunweb.html",
+        filename: "assignsignature.html",
+        template: "./src/taskpane/HTML/assignsignature.html",
+        chunks: ["polyfill", "assignpane"],
+      }),
+      new HtmlWebpackPlugin({
+        filename: "autorunweb.html",
+        template: "./src/runtime/HTML/autorunweb.html",
         chunks: ["polyfill", "autorun"],
       }),
       new CopyWebpackPlugin({
@@ -82,7 +88,7 @@ module.exports = async (env, options) => {
             },
           },
           {
-            from: "src/runtime/Js/clbautorunshared.js",
+            from: "src/runtime/Js/autorunshared.js",
             to: "[name]" + "[ext]",
           },
         ],
