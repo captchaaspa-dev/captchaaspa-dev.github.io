@@ -4,8 +4,8 @@ const devCerts = require("office-addin-dev-certs");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
-const urlDev = "https://localhost:3000/";
-const urlProd = "https://officedev.github.io/Office-Add-in-samples/Samples/hello-world/outlook-hello-world";
+const urlDev = "https://localhost:3000";
+const urlProd = "https://www.contoso.com"; // CHANGE THIS TO YOUR PRODUCTION DEPLOYMENT LOCATION
 
 async function getHttpsOptions() {
   const httpsOptions = await devCerts.getHttpsServerOptions();
@@ -18,7 +18,9 @@ module.exports = async (env, options) => {
     devtool: "source-map",
     entry: {
       polyfill: ["core-js/stable", "regenerator-runtime/runtime"],
-      taskpane: ["./taskpane.html"],
+      assignpane: ["./src/taskpane/Js/taskpane_main.js", "./src/taskpane/HTML/assignsignature.html"],
+      editpane: ["./src/taskpane/HTML/editsignature.html"],
+      autorun: ["./src/runtime/Js/autorunshared.js", "./src/runtime/HTML/autorunweb.html"],
     },
     output: {
       clean: true,
@@ -33,6 +35,9 @@ module.exports = async (env, options) => {
           exclude: /node_modules/,
           use: {
             loader: "babel-loader",
+            options: {
+              presets: ["@babel/preset-env"],
+            },
           },
         },
         {
@@ -51,9 +56,19 @@ module.exports = async (env, options) => {
     },
     plugins: [
       new HtmlWebpackPlugin({
-        filename: "taskpane.html",
-        template: "./taskpane.html",
-        chunks: ["polyfill", "taskpane"],
+        filename: "editsignature.html",
+        template: "./src/taskpane/HTML/editsignature.html",
+        chunks: ["polyfill", "editpane"],
+      }),
+      new HtmlWebpackPlugin({
+        filename: "assignsignature.html",
+        template: "./src/taskpane/HTML/assignsignature.html",
+        chunks: ["polyfill", "assignpane"],
+      }),
+      new HtmlWebpackPlugin({
+        filename: "autorunweb.html",
+        template: "./src/runtime/HTML/autorunweb.html",
+        chunks: ["polyfill", "autorun"],
       }),
       new CopyWebpackPlugin({
         patterns: [
@@ -62,7 +77,7 @@ module.exports = async (env, options) => {
             to: "assets/[name][ext][query]",
           },
           {
-            from: "manifest*.*",
+            from: "manifest*.json",
             to: "[name]" + "[ext]",
             transform(content) {
               if (dev) {
@@ -71,6 +86,10 @@ module.exports = async (env, options) => {
                 return content.toString().replace(new RegExp(urlDev, "g"), urlProd);
               }
             },
+          },
+          {
+            from: "src/runtime/Js/autorunshared.js",
+            to: "[name]" + "[ext]",
           },
         ],
       }),
