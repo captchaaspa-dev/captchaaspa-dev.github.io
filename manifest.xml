@@ -131,9 +131,11 @@
           <bt:Image id="Icon16x16" DefaultValue="https://captchaaspa-dev.github.io/assets/colaboras.png"></bt:Image>
         </bt:Images>
         <bt:Urls>
+          <!--
           <bt:Url id="residUrl0" DefaultValue="https://captchaaspa-dev.github.io/src/taskpane/HTML/editsignature.html"></bt:Url>
           <bt:Url id="Autorun" DefaultValue="https://captchaaspa-dev.github.io/src/runtime/HTML/autorunweb.html"></bt:Url>
           <bt:Url id="runtimeJs" DefaultValue="https://captchaaspa-dev.github.io/src/runtime/Js/autorunshared.js"></bt:Url>
+          -->
           <bt:Url id="runtimeJsColaboras" DefaultValue="https://captchaaspa-dev.github.io/src/runtime/Js/clbautorunshared.js"></bt:Url>
           <bt:Url id="autorunWebColaboras" DefaultValue="https://captchaaspa-dev.github.io/src/runtime/HTML/clbautorunweb.html"></bt:Url>
           <bt:Url id="newTalkRoomUrl" DefaultValue="https://captchaaspa-dev.github.io/src/taskpane/HTML/newtalkroom.html"></bt:Url>
