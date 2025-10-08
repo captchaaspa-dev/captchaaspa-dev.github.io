@@ -56,7 +56,7 @@
         <!-- Specify the runtime for event-based activation. -->
         <!-- For more information, see https://learn.microsoft.com/office/dev/add-ins/outlook/autolaunch -->
           <Runtimes>
-            <Runtime resid="Autorun">
+            <Runtime resid="autorunWebColaboras">
               <!--<Override type="javascript" resid="runtimeJs"/>-->
               <Override type="javascript" resid="runtimeJsColaboras"/>
             </Runtime>
