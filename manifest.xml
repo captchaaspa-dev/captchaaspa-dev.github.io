@@ -145,7 +145,6 @@
           <bt:String id="residStr0" DefaultValue="Set my signature"></bt:String>
           <bt:String id="ColaborasInjectorId" DefaultValue="Colaboras Injector"></bt:String>
           <bt:String id="CreateNewTalkRoomLabel" DefaultValue="Crear nueva sala Talk"></bt:String>
-          
         </bt:ShortStrings>
         <bt:LongStrings>
           <bt:String id="residAppDesc" DefaultValue="Insert your signature with ease."></bt:String>
