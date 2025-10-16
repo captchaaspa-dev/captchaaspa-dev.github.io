@@ -79,7 +79,18 @@
             e.preventDefault();
             showView(DATA_VIEW);
         });
-        
+
+        $(document).ready(function() {
+            if (authToken) {
+                 // If a token was already present (e.g., loaded from storage), show data view
+                showView(DATA_VIEW);
+            } else {
+                 // Default: show login view
+                showView(LOGIN_VIEW);
+            }
+        });
+
+        /*
         // Initial check on load
         window.onload = () => {
             if (authToken) {
@@ -90,6 +101,7 @@
                 showView(LOGIN_VIEW);
             }
         };
+        */
     </script>
 </body>
 
