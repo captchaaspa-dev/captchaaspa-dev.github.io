@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Add-in</title>
+    <!-- Load Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for the Outlook Add-in theme */
+        :root {
+            --primary: #0078d4; /* Microsoft Blue */
+            --primary-dark: #005a9e;
+            --background: #f3f2f1; /* Light gray background */
+            --card-bg: #ffffff;
+            --text-color: #323130;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align content to the top */
+            min-height: 100vh;
+            margin: 0;
+            padding: 1rem;
+        }
+        .view-container {
+            transition: opacity 0.3s ease;
+        }
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Unified Main Container -->
+    <div class="w-full max-w-sm">
+
+        <!-- ============================================== -->
+        <!-- VIEW 1: LOGIN VIEW -->
+        <!-- ============================================== -->
+        <div id="login-view" class="view-container bg-white p-6 shadow-xl rounded-xl border border-gray-200">
+            <h1 class="text-3xl font-extrabold text-center mb-6" style="color: var(--primary);">
+                Remote Service Login
+            </h1>
+
+            <!-- Message/Status Display Area -->
+            <div id="loginMessageBox" class="p-3 mb-4 rounded-lg text-sm font-medium hidden" role="alert"></div>
+
+            <form id="loginForm">
+                <div class="mb-4">
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                    <input type="email" id="email" name="email" required
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2"
+                           style="transition: border-color 0.15s ease-in-out;"
+                           onfocus="this.style.borderColor=getComputedStyle(document.documentElement).getPropertyValue('--primary')"
+                           onblur="this.style.borderColor='rgb(209 213 219)'"
+                           placeholder="test@outlook.com">
+                </div>
+
+                <div class="mb-6">
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <input type="password" id="password" name="password" required
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2"
+                           style="transition: border-color 0.15s ease-in-out;"
+                           onfocus="this.style.borderColor=getComputedStyle(document.documentElement).getPropertyValue('--primary')"
+                           onblur="this.style.borderColor='rgb(209 213 219)'"
+                           placeholder="••••••••">
+                </div>
+
+                <button type="submit" id="loginButton"
+                        class="w-full py-3 text-white font-semibold rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-opacity-50"
+                        style="background-color: var(--primary); focus-ring-color: var(--primary);"
+                        >
+                    Log In
+                </button>
+            </form>
+        </div>
+
+
+        <!-- ============================================== -->
+        <!-- VIEW 2: DATA VIEW -->
+        <!-- ============================================== -->
+        <div id="data-view" class="view-container bg-white p-6 shadow-xl rounded-xl border border-gray-200 hidden">
+            <h1 class="text-3xl font-extrabold text-center mb-6" style="color: var(--primary);">
+                Service Data
+            </h1>
+
+            <div id="dataMessageBox" class="p-3 mb-4 rounded-lg text-sm font-medium hidden" role="alert"></div>
+
+            <p class="text-gray-600 mb-4 text-center">
+                Welcome! Here is the data retrieved using your session token.
+            </p>
+
+            <!-- Data Display Area -->
+            <div id="dataDisplay" class="bg-gray-50 p-4 border border-gray-200 rounded-lg min-h-[150px] overflow-auto mb-6 text-sm">
+                <p class="text-gray-400 text-center py-4">Loading data...</p>
+            </div>
+
+            <button id="logoutButton"
+                    class="w-full py-2 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300">
+                Log Out
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // ==============================================
+        // STATE AND CONFIGURATION
+        // ==============================================
+        const LOGIN_VIEW = 'login-view';
+        const DATA_VIEW = 'data-view';
+        const STORAGE_KEY = 'serviceAuthToken'; 
+        let authToken = null; 
+        
+        // SECURITY NOTE: This key is hardcoded for demo purposes and is NOT secure in a production app.
+        // A real add-in should derive the key securely and dynamically.
+        const CRYPTO_KEY_STRING = 'OutlookAddinDemoKeyMustBeSecurelyManaged123456'; 
+
+        // DOM Elements (kept for brevity)
+        const loginView = document.getElementById(LOGIN_VIEW);
+        const dataView = document.getElementById(DATA_VIEW);
+        const loginForm = document.getElementById('loginForm');
+        const loginButton = document.getElementById('loginButton');
+        const logoutButton = document.getElementById('logoutButton');
+        const loginMessageBox = document.getElementById('loginMessageBox');
+        const dataMessageBox = document.getElementById('dataMessageBox');
+        const dataDisplay = document.getElementById('dataDisplay');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+
+
+        // ==============================================
+        // CRYPTOGRAPHY FUNCTIONS (Web Crypto API)
+        // ==============================================
+
+        /** Imports the hardcoded string key into a CryptoKey object for AES-GCM */
+        async function getEncryptionKey() {
+            // Use the first 32 bytes of the string for AES-256 key size
+            const keyData = new TextEncoder().encode(CRYPTO_KEY_STRING.substring(0, 32));
+            return crypto.subtle.importKey(
+                "raw",
+                keyData,
+                { name: "AES-GCM", length: 256 },
+                false, // not exportable
+                ["encrypt", "decrypt"]
+            );
+        }
+
+        // ==============================================
+        // STORAGE FUNCTIONS (Encrypted Roaming Settings Simulation)
+        // ==============================================
+
+        /** Saves the auth token to storage, encrypting it first. */
+        async function saveToken(token) {
+            if (!token) {
+                clearToken();
+                return;
+            }
+            
+            // NOTE: In a real add-in, this would save to Office.context.roamingSettings.
+            try {
+                const key = await getEncryptionKey();
+                const iv = crypto.getRandomValues(new Uint8Array(12)); // 12-byte IV for AES-GCM
+                const data = new TextEncoder().encode(token);
+
+                const encrypted = await crypto.subtle.encrypt(
+                    { name: "AES-GCM", iv: iv },
+                    key,
+                    data
+                );
+
+                // Store the IV and ciphertext together, separated by a colon, base64-encoded
+                const ivBase64 = btoa(String.fromCharCode.apply(null, iv));
+                const encryptedBase64 = btoa(String.fromCharCode.apply(null, new Uint8Array(encrypted)));
+                
+                localStorage.setItem(STORAGE_KEY, `${ivBase64}:${encryptedBase64}`);
+                console.log("Token successfully encrypted and saved.");
+            } catch (e) {
+                console.error("Encryption failed. Token NOT saved.", e);
+            }
+        }
+
+        /** Loads the auth token from storage and decrypts it. */
+        async function loadToken() {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (!stored || stored.indexOf(':') === -1) {
+                // Not found or not in the encrypted format (plain text fallback, treat as expired)
+                if(stored) console.warn("Found unencrypted/malformed token. Clearing storage.");
+                clearToken();
+                return null; 
+            }
+
+            // NOTE: In a real add-in, this would load from Office.context.roamingSettings.
+            try {
+                const key = await getEncryptionKey();
+                const [ivBase64, encryptedBase64] = stored.split(':');
+
+                const iv = Uint8Array.from(atob(ivBase64), c => c.charCodeAt(0));
+                const encrypted = Uint8Array.from(atob(encryptedBase64), c => c.charCodeAt(0));
+
+                const decrypted = await crypto.subtle.decrypt(
+                    { name: "AES-GCM", iv: iv },
+                    key,
+                    encrypted
+                );
+                console.log("Token successfully decrypted.");
+                return new TextDecoder().decode(decrypted);
+
+            } catch (e) {
+                console.error("Decryption failed. Token is unusable or tampered with.", e);
+                clearToken(); // Clear corrupted data
+                return null;
+            }
+        }
+
+        /** Clears the auth token from storage. */
+        function clearToken() {
+            // NOTE: In a real add-in, this would be: Office.context.roamingSettings.remove() and saveAsync()
+            localStorage.removeItem(STORAGE_KEY);
+        }
+
+
+        // ==============================================
+        // UTILITY FUNCTIONS (unchanged)
+        // ==============================================
+
+        function showMessage(type, text, box) {
+            box.textContent = text;
+            box.classList.remove('hidden', 'bg-red-100', 'text-red-800', 'bg-green-100', 'text-green-800', 'bg-blue-100', 'text-blue-800');
+            box.classList.add('block');
+
+            if (type === 'success') {
+                box.classList.add('bg-green-100', 'text-green-800');
+            } else if (type === 'error') {
+                box.classList.add('bg-red-100', 'text-red-800');
+            } else { // info
+                box.classList.add('bg-blue-100', 'text-blue-800');
+            }
+        }
+
+        function hideMessage(box) {
+            box.classList.add('hidden');
+        }
+
+        function showView(viewId) {
+            [loginView, dataView].forEach(view => {
+                if (view.id === viewId) {
+                    view.classList.remove('hidden');
+                } else {
+                    view.classList.add('hidden');
+                }
+            });
+        }
+
+        // ==============================================
+        // API SIMULATION FUNCTIONS (unchanged)
+        // ==============================================
+
+        async function remoteApiLogin(email, password) {
+            await new Promise(resolve => setTimeout(Math.random() * 800 + 400, resolve));
+            if (email === 'test@outlook.com' && password === 'P@sswOrd1') {
+                return { success: true, token: 'fake-jwt-token-12345-' + Date.now(), userId: 'user-001' };
+            }
+            return { success: false, message: 'Invalid credentials. Use test@outlook.com / P@sswOrd1' };
+        }
+
+        async function fetchRemoteData(token) {
+            console.log(`Fetching data with token: ${token.substring(0, 20)}...`);
+            dataDisplay.innerHTML = '<p class="text-gray-400 text-center py-4">Fetching data...</p>';
+
+            await new Promise(resolve => setTimeout(Math.random() * 1200 + 600, resolve));
+
+            if (token && token.startsWith('fake-jwt-token')) {
+                const data = {
+                    title: "Outlook Add-in User Data",
+                    timestamp: new Date().toLocaleString(),
+                    inboxItems: 42,
+                    pendingTasks: 5,
+                    settings: { theme: 'default', notifications: true }
+                };
+                return { success: true, data: data };
+            }
+
+            return { success: false, message: 'Authorization failed or token expired.' };
+        }
+
+
+        // ==============================================
+        // CORE APPLICATION LOGIC (Updated for async storage)
+        // ==============================================
+
+        async function handleLogin(e) {
+            e.preventDefault();
+
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+
+            loginButton.disabled = true;
+            loginButton.textContent = 'Logging in...';
+            loginButton.classList.add('opacity-70');
+            hideMessage(loginMessageBox);
+
+            try {
+                const result = await remoteApiLogin(email, password);
+
+                if (result.success) {
+                    authToken = result.token; // Store token in memory
+                    await saveToken(authToken); // *** NOW ASYNCHRONOUS ***
+                    showMessage('success', 'Login successful! Redirecting...', loginMessageBox);
+                    
+                    emailInput.value = '';
+                    passwordInput.value = '';
+
+                    await new Promise(resolve => setTimeout(1000, resolve));
+                    showDataView();
+
+                } else {
+                    showMessage('error', result.message, loginMessageBox);
+                }
+
+            } catch (error) {
+                console.error('Login process failed:', error);
+                showMessage('error', 'A critical error occurred. Check console.', loginMessageBox);
+            } finally {
+                loginButton.disabled = false;
+                loginButton.textContent = 'Log In';
+                loginButton.classList.remove('opacity-70');
+            }
+        }
+
+        async function showDataView() {
+            showView(DATA_VIEW);
+            hideMessage(dataMessageBox);
+            dataDisplay.innerHTML = '<p class="text-gray-400 text-center py-4">Fetching data...</p>';
+
+            const fetchResult = await fetchRemoteData(authToken);
+
+            if (fetchResult.success) {
+                showMessage('success', 'Latest data loaded successfully.', dataMessageBox);
+                // Format and display the retrieved data
+                dataDisplay.innerHTML = `
+                    <div class="space-y-2">
+                        <p class="font-bold text-lg">${fetchResult.data.title}</p>
+                        <p><strong>Timestamp:</strong> ${fetchResult.data.timestamp}</p>
+                        <p><strong>Inbox Count:</strong> <span class="text-blue-700 font-semibold">${fetchResult.data.inboxItems}</span></p>
+                        <p><strong>Pending Tasks:</strong> <span class="text-red-700 font-semibold">${fetchResult.data.pendingTasks}</span></p>
+                        <p class="pt-2"><strong>Settings:</strong></p>
+                        <ul class="ml-4 list-disc list-inside">
+                            <li>Theme: ${fetchResult.data.settings.theme}</li>
+                            <li>Notifications: ${fetchResult.data.settings.notifications ? 'On' : 'Off'}</li>
+                        </ul>
+                        <p class="text-xs text-gray-500 pt-4">Token: ${authToken.substring(0, 30)}...</p>
+                    </div>
+                `;
+            } else {
+                showMessage('error', `Failed to load data: ${fetchResult.message}. Please log in again.`, dataMessageBox);
+                logout();
+            }
+        }
+
+        function logout() {
+            authToken = null; // Clear token in memory
+            clearToken();     // Clears encrypted token from storage
+            showMessage('info', 'You have been logged out.', loginMessageBox);
+            showView(LOGIN_VIEW);
+        }
+
+        // ==============================================
+        // INITIALIZATION AND EVENT LISTENERS
+        // ==============================================
+
+        loginForm.addEventListener('submit', handleLogin);
+        logoutButton.addEventListener('click', logout);
+
+        // Initial check on load (now async because loadToken is async)
+        window.onload = async () => {
+             // Show a message while we check storage
+             showMessage('info', 'Checking for existing session...', loginMessageBox);
+             
+             // *** ASYNC LOAD TOKEN ***
+             authToken = await loadToken();
+
+             if (authToken) {
+                 showMessage('success', 'Encrypted session loaded. Loading data...', loginMessageBox);
+                 await new Promise(resolve => setTimeout(500, resolve)); // short delay for message visibility
+                 showDataView();
+             } else {
+                 showView(LOGIN_VIEW);
+                 showMessage('info', 'Use test@outlook.com and P@sswOrd1 to simulate login. (Token storage is now encrypted.)', loginMessageBox);
+             }
+        };
+    </script>
+</body>
+</html>

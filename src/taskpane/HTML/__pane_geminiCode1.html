@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Add-in</title>
+    <!-- Load Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for the Outlook Add-in theme */
+        :root {
+            --primary: #0078d4; /* Microsoft Blue */
+            --primary-dark: #005a9e;
+            --background: #f3f2f1; /* Light gray background */
+            --card-bg: #ffffff;
+            --text-color: #323130;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align content to the top */
+            min-height: 100vh;
+            margin: 0;
+            padding: 1rem;
+        }
+        .view-container {
+            transition: opacity 0.3s ease;
+        }
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Unified Main Container -->
+    <div class="w-full max-w-sm">
+
+        <!-- ============================================== -->
+        <!-- VIEW 1: LOGIN VIEW (Initially based on previous file) -->
+        <!-- ============================================== -->
+        <div id="login-view" class="view-container bg-white p-6 shadow-xl rounded-xl border border-gray-200">
+            <h1 class="text-3xl font-extrabold text-center mb-6" style="color: var(--primary);">
+                Remote Service Login
+            </h1>
+
+            <!-- Message/Status Display Area -->
+            <div id="loginMessageBox" class="p-3 mb-4 rounded-lg text-sm font-medium hidden" role="alert"></div>
+
+            <form id="loginForm">
+                <div class="mb-4">
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                    <input type="email" id="email" name="email" required
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2"
+                           style="transition: border-color 0.15s ease-in-out;"
+                           onfocus="this.style.borderColor=getComputedStyle(document.documentElement).getPropertyValue('--primary')"
+                           onblur="this.style.borderColor='rgb(209 213 219)'"
+                           placeholder="test@outlook.com">
+                </div>
+
+                <div class="mb-6">
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <input type="password" id="password" name="password" required
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2"
+                           style="transition: border-color 0.15s ease-in-out;"
+                           onfocus="this.style.borderColor=getComputedStyle(document.documentElement).getPropertyValue('--primary')"
+                           onblur="this.style.borderColor='rgb(209 213 219)'"
+                           placeholder="••••••••">
+                </div>
+
+                <button type="submit" id="loginButton"
+                        class="w-full py-3 text-white font-semibold rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-opacity-50"
+                        style="background-color: var(--primary); focus-ring-color: var(--primary);"
+                        >
+                    Log In
+                </button>
+            </form>
+        </div>
+
+
+        <!-- ============================================== -->
+        <!-- VIEW 2: DATA VIEW (Only shown after successful login) -->
+        <!-- ============================================== -->
+        <div id="data-view" class="view-container bg-white p-6 shadow-xl rounded-xl border border-gray-200 hidden">
+            <h1 class="text-3xl font-extrabold text-center mb-6" style="color: var(--primary);">
+                Service Data
+            </h1>
+
+            <div id="dataMessageBox" class="p-3 mb-4 rounded-lg text-sm font-medium hidden" role="alert"></div>
+
+            <p class="text-gray-600 mb-4 text-center">
+                Welcome! Here is the data retrieved using your session token.
+            </p>
+
+            <!-- Data Display Area -->
+            <div id="dataDisplay" class="bg-gray-50 p-4 border border-gray-200 rounded-lg min-h-[150px] overflow-auto mb-6 text-sm">
+                <p class="text-gray-400 text-center py-4">Loading data...</p>
+            </div>
+
+            <button id="logoutButton"
+                    class="w-full py-2 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300">
+                Log Out
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // ==============================================
+        // STATE AND CONFIGURATION
+        // ==============================================
+        const LOGIN_VIEW = 'login-view';
+        const DATA_VIEW = 'data-view';
+        let authToken = null; // In a real app, use Office.context.roamingSettings or Office.context.storage
+
+        // DOM Elements
+        const loginView = document.getElementById(LOGIN_VIEW);
+        const dataView = document.getElementById(DATA_VIEW);
+        const loginForm = document.getElementById('loginForm');
+        const loginButton = document.getElementById('loginButton');
+        const logoutButton = document.getElementById('logoutButton');
+        const loginMessageBox = document.getElementById('loginMessageBox');
+        const dataMessageBox = document.getElementById('dataMessageBox');
+        const dataDisplay = document.getElementById('dataDisplay');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+
+
+        // ==============================================
+        // UTILITY FUNCTIONS
+        // ==============================================
+
+        function showMessage(type, text, box) {
+            box.textContent = text;
+            box.classList.remove('hidden', 'bg-red-100', 'text-red-800', 'bg-green-100', 'text-green-800', 'bg-blue-100', 'text-blue-800');
+            box.classList.add('block');
+
+            if (type === 'success') {
+                box.classList.add('bg-green-100', 'text-green-800');
+            } else if (type === 'error') {
+                box.classList.add('bg-red-100', 'text-red-800');
+            } else { // info
+                box.classList.add('bg-blue-100', 'text-blue-800');
+            }
+        }
+
+        function hideMessage(box) {
+            box.classList.add('hidden');
+        }
+
+        function showView(viewId) {
+            [loginView, dataView].forEach(view => {
+                if (view.id === viewId) {
+                    view.classList.remove('hidden');
+                } else {
+                    view.classList.add('hidden');
+                }
+            });
+        }
+
+        // ==============================================
+        // API SIMULATION FUNCTIONS
+        // ==============================================
+
+        // Simulates an asynchronous call to a remote API for login
+        async function remoteApiLogin(email, password) {
+            // Simulate network delay
+            await new Promise(resolve => setTimeout(Math.random() * 800 + 400, resolve));
+
+            if (email === 'test@outlook.com' && password === 'P@sswOrd1') {
+                return { success: true, token: 'fake-jwt-token-12345-' + Date.now(), userId: 'user-001' };
+            }
+            return { success: false, message: 'Invalid credentials. Use test@outlook.com / P@sswOrd1' };
+        }
+
+        // Simulates retrieving data using an authorization token
+        async function fetchRemoteData(token) {
+            console.log(`Fetching data with token: ${token.substring(0, 20)}...`);
+            dataDisplay.innerHTML = '<p class="text-gray-400 text-center py-4">Fetching data...</p>';
+
+            // Simulate network delay
+            await new Promise(resolve => setTimeout(Math.random() * 1200 + 600, resolve));
+
+            if (token && token.startsWith('fake-jwt-token')) {
+                const data = {
+                    title: "Outlook Add-in User Data",
+                    timestamp: new Date().toLocaleString(),
+                    inboxItems: 42,
+                    pendingTasks: 5,
+                    settings: { theme: 'default', notifications: true }
+                };
+                return { success: true, data: data };
+            }
+
+            return { success: false, message: 'Authorization failed or token expired.' };
+        }
+
+
+        // ==============================================
+        // CORE APPLICATION LOGIC
+        // ==============================================
+
+        async function handleLogin(e) {
+            e.preventDefault();
+
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+
+            loginButton.disabled = true;
+            loginButton.textContent = 'Logging in...';
+            loginButton.classList.add('opacity-70');
+            hideMessage(loginMessageBox);
+
+            try {
+                const result = await remoteApiLogin(email, password);
+
+                if (result.success) {
+                    authToken = result.token; // Store token
+                    showMessage('success', 'Login successful! Redirecting...', loginMessageBox);
+                    
+                    // Clear form for security
+                    emailInput.value = '';
+                    passwordInput.value = '';
+
+                    // Switch to the data view
+                    await new Promise(resolve => setTimeout(1000, resolve)); // short delay for message visibility
+                    showDataView();
+
+                } else {
+                    showMessage('error', result.message, loginMessageBox);
+                }
+
+            } catch (error) {
+                console.error('Login process failed:', error);
+                showMessage('error', 'A critical error occurred. Check console.', loginMessageBox);
+            } finally {
+                loginButton.disabled = false;
+                loginButton.textContent = 'Log In';
+                loginButton.classList.remove('opacity-70');
+            }
+        }
+
+        async function showDataView() {
+            showView(DATA_VIEW);
+            hideMessage(dataMessageBox);
+            dataDisplay.innerHTML = '<p class="text-gray-400 text-center py-4">Fetching data...</p>';
+
+            const fetchResult = await fetchRemoteData(authToken);
+
+            if (fetchResult.success) {
+                showMessage('success', 'Latest data loaded successfully.', dataMessageBox);
+                // Format and display the retrieved data
+                dataDisplay.innerHTML = `
+                    <div class="space-y-2">
+                        <p class="font-bold text-lg">${fetchResult.data.title}</p>
+                        <p><strong>Timestamp:</strong> ${fetchResult.data.timestamp}</p>
+                        <p><strong>Inbox Count:</strong> <span class="text-blue-700 font-semibold">${fetchResult.data.inboxItems}</span></p>
+                        <p><strong>Pending Tasks:</strong> <span class="text-red-700 font-semibold">${fetchResult.data.pendingTasks}</span></p>
+                        <p class="pt-2"><strong>Settings:</strong></p>
+                        <ul class="ml-4 list-disc list-inside">
+                            <li>Theme: ${fetchResult.data.settings.theme}</li>
+                            <li>Notifications: ${fetchResult.data.settings.notifications ? 'On' : 'Off'}</li>
+                        </ul>
+                        <p class="text-xs text-gray-500 pt-4">Token: ${authToken.substring(0, 30)}...</p>
+                    </div>
+                `;
+            } else {
+                showMessage('error', `Failed to load data: ${fetchResult.message}. Please log in again.`, dataMessageBox);
+                // If data fetch fails due to auth, prompt re-login
+                logout();
+            }
+        }
+
+        function logout() {
+            authToken = null; // Clear token
+            showMessage('info', 'You have been logged out.', loginMessageBox);
+            showView(LOGIN_VIEW);
+        }
+
+        // ==============================================
+        // INITIALIZATION AND EVENT LISTENERS
+        // ==============================================
+
+        // Set up event listeners
+        loginForm.addEventListener('submit', handleLogin);
+        logoutButton.addEventListener('click', logout);
+
+        // Initial check on load
+        window.onload = () => {
+             if (authToken) {
+                 // If a token was already present (e.g., loaded from storage), show data view
+                 showDataView();
+             } else {
+                 // Default: show login view
+                 showView(LOGIN_VIEW);
+                 showMessage('info', 'Use test@outlook.com and P@sswOrd1 to simulate login.', loginMessageBox);
+             }
+        };
+    </script>
+</body>
+</html>

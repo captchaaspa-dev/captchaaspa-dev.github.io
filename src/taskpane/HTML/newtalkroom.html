@@ -19,15 +19,66 @@
 </head>
 
 <body>  
-
     <div class="container">
+
+        <!--
         <h2>Crear conversación de Talk</h2>
 
         <button id="next_button_t1" class="registerbtn" onclick="create_talk_room()">Crear sala</button>
 
         <p id="message"></p>
-    </div>
+        -->
+        <div id="view-login">
+            LOGIN
 
+            <button type="submit" id="loginButton">
+                Log In
+            </button>
+        </div>
+
+        <div id="view-data">
+            DATA
+        </div>
+    </div>
+    <script>
+        const LOGIN_VIEW = 'view-login';
+        const DATA_VIEW = 'view-data';
+
+        // DOM Elements
+        const loginView = document.getElementById(LOGIN_VIEW);
+        const dataView = document.getElementById(DATA_VIEW);
+        let authToken = null; // In a real app, use Office.context.roamingSettings or Office.context.storage
+
+        const loginButton = document.getElementById('loginButton');
+
+        function showView(viewId) {
+            [loginView, dataView].forEach(view => {
+                if (view.id === viewId) {
+                    view.classList.remove('hidden');
+                } else {
+                    view.classList.add('hidden');
+                }
+            });
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            showView(DATA_VIEW);
+        }
+
+        loginButton.addEventListener('submit', handleLogin);
+
+        // Initial check on load
+        window.onload = () => {
+            if (authToken) {
+                 // If a token was already present (e.g., loaded from storage), show data view
+                showView(DATA_VIEW);
+            } else {
+                 // Default: show login view
+                showView(LOGIN_VIEW);
+            }
+        };
+    </script>
 </body>
 
 </html>

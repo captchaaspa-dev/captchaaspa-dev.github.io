@@ -18,6 +18,7 @@ function create_talk_room()
     console.log("timeZone:");
     console.log(Office.context.mailbox.userProfile.timeZone);
 
+    //No se puede usar Office.auth.getAccessToken() si el add-in se llama desde Outlook.com o Gmail.com
     console.log("ssoToken:");
     getSSOToken();
 }
