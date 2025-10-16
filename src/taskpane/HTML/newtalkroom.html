@@ -59,8 +59,10 @@
         function showView(viewId) {
             [loginView, dataView].forEach(view => {
                 if (view.id === viewId) {
+                    console.log("mostrando " + viewId);
                     view.classList.remove('hidden');
                 } else {
+                    console.log("ocultando " + viewId);
                     view.classList.add('hidden');
                 }
             });
