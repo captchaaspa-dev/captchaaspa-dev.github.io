@@ -59,22 +59,27 @@
         function showView(viewId) {
             [loginView, dataView].forEach(view => {
                 if (view.id === viewId) {
-                    console.log("mostrando " + viewId);
+                    console.log("mostrando " + view.id);
                     view.classList.remove('hidden');
                 } else {
-                    console.log("ocultando " + viewId);
+                    console.log("ocultando " + view.id);
                     view.classList.add('hidden');
                 }
             });
         }
 
-        async function handleLogin(e) {
+        /*async function handleLogin(e) {
             e.preventDefault();
             showView(DATA_VIEW);
         }
 
         loginButton.addEventListener('submit', handleLogin);
-
+        */
+        $( "#loginButton" ).on( "click", function(e) {
+            e.preventDefault();
+            showView(DATA_VIEW);
+        });
+        
         // Initial check on load
         window.onload = () => {
             if (authToken) {
