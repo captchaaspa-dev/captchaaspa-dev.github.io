@@ -55,6 +55,10 @@
         // DOM Elements
         const loginView = jQuery(VIEW_LOGIN);
         const dataView = jQuery(VIEW_DATA);
+
+        console.log("COLABORAS!! - dataView");
+        console.log(dataView);
+
         //const dataView = document.getElementById(VIEW_DATA);
         let authToken = null; // In a real app, use Office.context.roamingSettings or Office.context.storage
 
@@ -63,6 +67,12 @@
         function showView(viewId) {
             [loginView, dataView].forEach(view => {
                 let id = view.attr("id");
+
+                console.log("COLABORAS!! - id:attr");
+                console.log(id);
+                console.log("COLABORAS!! - id:prop");
+                console.log(view.prop("id"));
+
                 if (id === viewId) {
                     console.log("mostrando " + id);
                     view.removeClass('hidden');
