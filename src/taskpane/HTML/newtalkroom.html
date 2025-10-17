@@ -114,23 +114,43 @@
         }
 
         async function doCreateNewTalkRoom() {
-            Office.context.mailbox.item.sessionData.getAsync("appointment_info", function (asyncResult) {
-                if (asyncResult.status !== Office.AsyncResultStatus.Succeeded) {
-                    console.log("error when reading 'appointment_info'!!");
-                    return;
-                }
-                console.log("sessionData:");
-                console.log(asyncResult);
-            });
+            if (!Office.context || !Office.context.mailbox || !Office.context.mailbox.item) {
+                console.log("Office.js not initialized or no item selected.");
+                return;
+            }
 
             let roomUrl = "https://panel.colaboras.cloud/room/newtalkroom#123";
-            Office.context.mailbox.item.sessionData.setAsync("appointment_info", JSON.stringify(roomUrl), function(asyncResult) {
-                if (asyncResult.status === Office.AsyncResultStatus.Succeeded) {
-                    console.log("'appointment_info' updated!!");
-                } else {
-                    console.log("error when updating 'appointment_info'!!");
+            const textToAppend = roomUrl;
+
+            Office.context.mailbox.item.body.getAsync(
+                { coercionType: Office.CoercionType.Text }, // Request content as plain text
+                (getAsyncResult) => {
+                    if (getAsyncResult.status === Office.AsyncResultStatus.Succeeded) {
+                        const currentBody = getAsyncResult.value;
+                        
+                        // 2. Concatenate the existing body and the new text
+                        // Use multiple newlines for separation in the plain text body
+                        const separator = "\n\n---\n\n"; 
+                        const newFullBody = currentBody + separator + textToAppend;
+
+                        // 3. Set the combined content back
+                        Office.context.mailbox.item.body.setAsync(
+                            newFullBody,
+                            { coercionType: Office.CoercionType.Text },
+                            (setAsyncResult) => {
+                                if (setAsyncResult.status === Office.AsyncResultStatus.Succeeded) {
+                                    console.log("description:");
+                                    console.log(newFullBody);
+                                } else {
+                                    console.log("error when updating event description!!");
+                                }
+                            }
+                        );
+                    } else {
+                        console.log("error when reading event description!!");
+                    }
                 }
-            });
+            );
         }
 
         $("#loginButton").on("click", function(e) {
