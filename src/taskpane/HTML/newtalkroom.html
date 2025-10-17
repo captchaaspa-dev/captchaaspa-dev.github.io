@@ -49,12 +49,12 @@
         </div>
     </div>
     <script>
-        const VIEW_LOGIN = '#view-login';
-        const VIEW_DATA = '#view-data';
+        const VIEW_LOGIN = 'view-login';
+        const VIEW_DATA = 'view-data';
 
         // DOM Elements
-        const loginView = jQuery(VIEW_LOGIN);
-        const dataView = jQuery(VIEW_DATA);
+        const loginView = jQuery('#'+VIEW_LOGIN);
+        const dataView = jQuery('#'+VIEW_DATA);
 
         console.log("COLABORAS!! - dataView");
         console.log(dataView);
@@ -68,6 +68,8 @@
             [loginView, dataView].forEach(view => {
                 let id = view.attr("id");
 
+                console.log("COLABORAS!! - viewId");
+                console.log(viewId);
                 console.log("COLABORAS!! - id:attr");
                 console.log(id);
                 console.log("COLABORAS!! - id:prop");
