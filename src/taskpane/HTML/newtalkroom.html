@@ -129,6 +129,11 @@
                 }
 
                 const bodyFormat = asyncResult.value;
+                console.log(
+                    'bodyFormat: ' + bodyFormat
+                );
+
+                
                 Office.context.mailbox.item.body.getAsync(
                 { coercionType: bodyFormat },
                 (getAsyncResult) => {
