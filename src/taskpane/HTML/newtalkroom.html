@@ -46,62 +46,48 @@
         </div>
     </div>
     <script>
-        const LOGIN_VIEW = 'view-login';
-        const DATA_VIEW = 'view-data';
+        const VIEW_LOGIN = '#view-login';
+        const VIEW_DATA = '#view-data';
 
         // DOM Elements
-        const loginView = document.getElementById(LOGIN_VIEW);
-        const dataView = document.getElementById(DATA_VIEW);
+        const loginView = jQuery(VIEW_LOGIN);
+        const dataView = jQuery(VIEW_DATA);
+        //const dataView = document.getElementById(VIEW_DATA);
         let authToken = null; // In a real app, use Office.context.roamingSettings or Office.context.storage
 
-        const loginButton = document.getElementById('loginButton');
+        //const loginButton = document.getElementById('loginButton');
 
         function showView(viewId) {
             [loginView, dataView].forEach(view => {
-                if (view.id === viewId) {
-                    console.log("mostrando " + view.id);
+                let id = view.attr("id");
+                if (id === viewId) {
+                    console.log("mostrando " + id);
                     view.classList.remove('hidden');
                 } else {
-                    console.log("ocultando " + view.id);
+                    console.log("ocultando " + id);
                     view.classList.add('hidden');
                 }
             });
         }
 
-        /*async function handleLogin(e) {
-            e.preventDefault();
-            showView(DATA_VIEW);
+        async function doLogin() {
+            showView(VIEW_DATA);
         }
 
-        loginButton.addEventListener('submit', handleLogin);
-        */
-        $( "#loginButton" ).on( "click", function(e) {
+        $("#loginButton").on("click", function(e) {
             e.preventDefault();
-            showView(DATA_VIEW);
+            doLogin();
         });
 
         $(document).ready(function() {
             if (authToken) {
                  // If a token was already present (e.g., loaded from storage), show data view
-                showView(DATA_VIEW);
+                showView(VIEW_DATA);
             } else {
                  // Default: show login view
-                showView(LOGIN_VIEW);
+                showView(VIEW_LOGIN);
             }
         });
-
-        /*
-        // Initial check on load
-        window.onload = () => {
-            if (authToken) {
-                 // If a token was already present (e.g., loaded from storage), show data view
-                showView(DATA_VIEW);
-            } else {
-                 // Default: show login view
-                showView(LOGIN_VIEW);
-            }
-        };
-        */
     </script>
 </body>
 
