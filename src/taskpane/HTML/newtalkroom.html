@@ -119,6 +119,46 @@
                 return;
             }
 
+
+            Office.context.mailbox.item.body.getTypeAsync((asyncResult) => {
+                if (asyncResult.status === Office.AsyncResultStatus.Failed) {
+                    console.log(
+                        'Action failed with error: ' + asyncResult.error.message
+                    );
+                    return;
+                }
+
+                const bodyFormat = asyncResult.value;
+                Office.context.mailbox.item.body.getAsync(
+                { coercionType: bodyFormat },
+                (getAsyncResult) => {
+
+                    if (getAsyncResult.status === Office.AsyncResultStatus.Failed) {
+                        console.log(
+                            'Action failed with error: ' + getAsyncResult.error.message
+                        );
+                        return;
+                    }
+
+                    console.log(getAsyncResult)
+
+                    let roomUrl = "https://panel.colaboras.cloud/room/newtalkroom#123";
+                    const textToAppend = roomUrl;
+
+                    const separator = "\n\n---\n\n"; 
+                    const newFullBody = currentBody + separator + textToAppend;
+
+                    console.log(
+                        'newFullBody: ' + newFullBody
+                    );
+                
+                });
+            });
+
+
+            //BORRAr
+            return;
+
             let roomUrl = "https://panel.colaboras.cloud/room/newtalkroom#123";
             const textToAppend = roomUrl;
 
