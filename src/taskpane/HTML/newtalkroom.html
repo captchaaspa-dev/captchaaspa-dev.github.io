@@ -135,7 +135,8 @@
 
                 
                 Office.context.mailbox.item.body.getAsync(
-                { coercionType: bodyFormat },
+                //{ coercionType: bodyFormat },
+                { coercionType: Office.CoercionType.Html },
                 (getAsyncResult) => {
 
                     if (getAsyncResult.status === Office.AsyncResultStatus.Failed) {
