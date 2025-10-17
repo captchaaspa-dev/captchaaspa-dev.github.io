@@ -113,9 +113,34 @@
             showView(VIEW_DATA);
         }
 
+        async function doCreateNewTalkRoom() {
+            Office.context.mailbox.item.sessionData.getAsync((asyncResult) => {
+                if (asyncResult.status !== Office.AsyncResultStatus.Succeeded) {
+                    console.log("error when reading 'appointment_info'!!");
+                    return;
+                }
+                console.log("sessionData:");
+                console.log(asyncResult);
+            });
+
+            let roomUrl = "https://panel.colaboras.cloud/room/newtalkroom#123";
+            Office.context.mailbox.item.sessionData.setAsync("appointment_info", JSON.stringify(roomUrl), function(asyncResult) {
+                if (asyncResult.status === Office.AsyncResultStatus.Succeeded) {
+                    console.log("'appointment_info' updated!!");
+                } else {
+                    console.log("error when updating 'appointment_info'!!");
+                }
+            });
+        }
+
         $("#loginButton").on("click", function(e) {
             e.preventDefault();
             doLogin();
+        });
+
+        $("#newTalkRoomButton").on("click", function(e) {
+            e.preventDefault();
+            doCreateNewTalkRoom();
         });
 
         $(document).ready(function() {
