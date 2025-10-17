@@ -37,15 +37,39 @@
         <p id="message"></p>
         -->
         <div id="view-login">
-            LOGIN
-
-            <button type="submit" id="loginButton">
-                Log In
-            </button>
+            <h1>
+                Colaboras [LOGGED OUT]
+            </h1>
+            <!-- Message/Status Display Area -->
+            <div id="loginMessageBox" class="hidden" role="alert"></div>
+            <form id="loginForm">
+                <div class="mb-4">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" required
+                            style="transition: border-color 0.15s ease-in-out;"
+                            placeholder="usuario@dominio.tld">
+                </div>
+                <div class="mb-4">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required
+                            style="transition: border-color 0.15s ease-in-out;"
+                            placeholder="••••••••">
+                </div>
+                <button type="submit" id="loginButton">
+                    Log In
+                </button>
+            </form>
         </div>
 
         <div id="view-data" class="hidden">
-            DATA
+            <h1>
+                Colaboras [LOGGED IN]
+            </h1>
+            <form id="newTalkRoomForm">
+                <button type="submit" id="newTalkRoomButton">
+                    Crear nueva sala
+                </button>
+            </form>
         </div>
     </div>
     <script>
@@ -56,8 +80,8 @@
         const loginView = jQuery('#'+VIEW_LOGIN);
         const dataView = jQuery('#'+VIEW_DATA);
 
-        console.log("COLABORAS!! - dataView");
-        console.log(dataView);
+        //console.log("COLABORAS!! - dataView");
+        //console.log(dataView);
 
         //const dataView = document.getElementById(VIEW_DATA);
         let authToken = null; // In a real app, use Office.context.roamingSettings or Office.context.storage
@@ -68,18 +92,18 @@
             [loginView, dataView].forEach(view => {
                 let id = view.attr("id");
 
-                console.log("COLABORAS!! - viewId");
+                /*console.log("COLABORAS!! - viewId");
                 console.log(viewId);
                 console.log("COLABORAS!! - id:attr");
                 console.log(id);
                 console.log("COLABORAS!! - id:prop");
-                console.log(view.prop("id"));
+                console.log(view.prop("id"));*/
 
                 if (id === viewId) {
-                    console.log("mostrando " + id);
+                    //console.log("mostrando " + id);
                     view.removeClass('hidden');
                 } else {
-                    console.log("ocultando " + id);
+                    //console.log("ocultando " + id);
                     view.addClass('hidden');
                 }
             });
