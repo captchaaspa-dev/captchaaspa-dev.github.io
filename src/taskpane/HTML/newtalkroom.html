@@ -114,7 +114,7 @@
         }
 
         async function doCreateNewTalkRoom() {
-            Office.context.mailbox.item.sessionData.getAsync((asyncResult) => {
+            Office.context.mailbox.item.sessionData.getAsync("appointment_info", function (asyncResult) {
                 if (asyncResult.status !== Office.AsyncResultStatus.Succeeded) {
                     console.log("error when reading 'appointment_info'!!");
                     return;
