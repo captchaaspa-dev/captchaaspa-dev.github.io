@@ -189,7 +189,7 @@
 
 
         async function remoteApiLogin(email, password) {
-            await new Promise(resolve => setTimeout(Math.random() * 800 + 400, resolve));
+            //await new Promise(resolve => setTimeout(Math.random() * 800 + 400, resolve));
             if (email === 'test@outlook.com' && password === 'P@sswOrd1') {
                 return { success: true, token: 'fake-jwt-token-12345-' + Date.now(), userId: 'user-001' };
             }
@@ -204,6 +204,9 @@
             
              // *** ASYNC LOAD TOKEN ***
             authToken = await loadToken();
+
+            console.log("authToken:");
+            console.log(authToken);
 
             if (authToken) {
                  //showMessage('success', 'Encrypted session loaded. Loading data...', loginMessageBox);
