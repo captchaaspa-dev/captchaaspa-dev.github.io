@@ -76,9 +76,18 @@
         const VIEW_LOGIN = 'view-login';
         const VIEW_DATA = 'view-data';
 
+        const STORAGE_KEY = 'colaborasAuthToken'; 
+
+        // SECURITY NOTE: This key is hardcoded for demo purposes and is NOT secure in a production app.
+        // A real add-in should derive the key securely and dynamically.
+        const CRYPTO_KEY_STRING = 'OutlookAddinDemoKeyMustBeSecurelyManaged123456'; 
+
         // DOM Elements
         const loginView = jQuery('#'+VIEW_LOGIN);
         const dataView = jQuery('#'+VIEW_DATA);
+
+        const emailInput = jQuery('#loginForm #email');
+        const passwordInput = jQuery('#loginForm #password');
 
         //console.log("COLABORAS!! - dataView");
         //console.log(dataView);
@@ -87,6 +96,125 @@
         let authToken = null; // In a real app, use Office.context.roamingSettings or Office.context.storage
 
         //const loginButton = document.getElementById('loginButton');
+
+        // ==============================================
+        // CRYPTOGRAPHY FUNCTIONS (Web Crypto API)
+        // ==============================================
+
+        /** Imports the hardcoded string key into a CryptoKey object for AES-GCM */
+        async function getEncryptionKey() {
+            // Use the first 32 bytes of the string for AES-256 key size
+            const keyData = new TextEncoder().encode(CRYPTO_KEY_STRING.substring(0, 32));
+            return crypto.subtle.importKey(
+                "raw",
+                keyData,
+                { name: "AES-GCM", length: 256 },
+                false, // not exportable
+                ["encrypt", "decrypt"]
+            );
+        }
+
+        // ==============================================
+        // STORAGE FUNCTIONS (Encrypted Roaming Settings Simulation)
+        // ==============================================
+
+        /** Saves the auth token to storage, encrypting it first. */
+        async function saveToken(token) {
+            if (!token) {
+                clearToken();
+                return;
+            }
+            
+            // NOTE: In a real add-in, this would save to Office.context.roamingSettings.
+            try {
+                const key = await getEncryptionKey();
+                const iv = crypto.getRandomValues(new Uint8Array(12)); // 12-byte IV for AES-GCM
+                const data = new TextEncoder().encode(token);
+
+                const encrypted = await crypto.subtle.encrypt(
+                    { name: "AES-GCM", iv: iv },
+                    key,
+                    data
+                );
+
+                // Store the IV and ciphertext together, separated by a colon, base64-encoded
+                const ivBase64 = btoa(String.fromCharCode.apply(null, iv));
+                const encryptedBase64 = btoa(String.fromCharCode.apply(null, new Uint8Array(encrypted)));
+                
+                localStorage.setItem(STORAGE_KEY, `${ivBase64}:${encryptedBase64}`);
+                console.log("Token successfully encrypted and saved.");
+            } catch (e) {
+                console.error("Encryption failed. Token NOT saved.", e);
+            }
+        }
+
+        /** Loads the auth token from storage and decrypts it. */
+        async function loadToken() {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (!stored || stored.indexOf(':') === -1) {
+                // Not found or not in the encrypted format (plain text fallback, treat as expired)
+                if(stored) console.warn("Found unencrypted/malformed token. Clearing storage.");
+                clearToken();
+                return null; 
+            }
+
+            // NOTE: In a real add-in, this would load from Office.context.roamingSettings.
+            try {
+                const key = await getEncryptionKey();
+                const [ivBase64, encryptedBase64] = stored.split(':');
+
+                const iv = Uint8Array.from(atob(ivBase64), c => c.charCodeAt(0));
+                const encrypted = Uint8Array.from(atob(encryptedBase64), c => c.charCodeAt(0));
+
+                const decrypted = await crypto.subtle.decrypt(
+                    { name: "AES-GCM", iv: iv },
+                    key,
+                    encrypted
+                );
+                console.log("Token successfully decrypted.");
+                return new TextDecoder().decode(decrypted);
+
+            } catch (e) {
+                console.error("Decryption failed. Token is unusable or tampered with.", e);
+                clearToken(); // Clear corrupted data
+                return null;
+            }
+        }
+
+        /** Clears the auth token from storage. */
+        function clearToken() {
+            // NOTE: In a real add-in, this would be: Office.context.roamingSettings.remove() and saveAsync()
+            localStorage.removeItem(STORAGE_KEY);
+        }
+
+
+        async function remoteApiLogin(email, password) {
+            await new Promise(resolve => setTimeout(Math.random() * 800 + 400, resolve));
+            if (email === 'test@outlook.com' && password === 'P@sswOrd1') {
+                return { success: true, token: 'fake-jwt-token-12345-' + Date.now(), userId: 'user-001' };
+            }
+            return { success: false, message: 'Invalid credentials. Use test@outlook.com / P@sswOrd1' };
+        }
+
+
+        async function loadSession() {
+            // Show a message while we check storage
+            //showMessage('info', 'Checking for existing session...', loginMessageBox);
+            console.log("Checking for existing session...");
+            
+             // *** ASYNC LOAD TOKEN ***
+            authToken = await loadToken();
+
+            if (authToken) {
+                 //showMessage('success', 'Encrypted session loaded. Loading data...', loginMessageBox);
+                 //await new Promise(resolve => setTimeout(500, resolve)); // short delay for message visibility
+                 //showDataView();
+                showView(VIEW_DATA);
+            } else {
+                showView(VIEW_LOGIN);
+                 //showMessage('info', 'Use test@outlook.com and P@sswOrd1 to simulate login. (Token storage is now encrypted.)', loginMessageBox);
+            }
+        }
 
         function showView(viewId) {
             [loginView, dataView].forEach(view => {
@@ -110,7 +238,48 @@
         }
 
         async function doLogin() {
+            try {
+                const email = emailInput.val().trim();
+                const password = passwordInput.val();
+
+                const result = await remoteApiLogin(email, password);
+
+                if (result.success) {
+                    authToken = result.token; // Store token in memory
+                    await saveToken(authToken); // *** NOW ASYNCHRONOUS ***
+                    //showMessage('success', 'Login successful! Redirecting...', loginMessageBox);
+
+                    console.log("Login sucess!");
+                    
+                    emailInput.value = '';
+                    passwordInput.value = '';
+
+                    //await new Promise(resolve => setTimeout(1000, resolve));
+                    //showDataView();
+                    showView(VIEW_DATA);
+
+                } else {
+                    ///showMessage('error', result.message, loginMessageBox);
+                    console.log("Login error:");
+                    console.log(result.message);
+                }
+
+            } catch (error) {
+                console.log("Login error:");
+                console.log(error);
+                //console.error('Login process failed:', error);
+                //showMessage('error', 'A critical error occurred. Check console.', loginMessageBox);
+            } finally {
+                /*loginButton.disabled = false;
+                loginButton.textContent = 'Log In';
+                loginButton.classList.remove('opacity-70');*/
+            }
+
+
+            /*
+            await saveToken(authToken); // *** NOW ASYNCHRONOUS ***
             showView(VIEW_DATA);
+            */
         }
 
         async function doCreateNewTalkRoom() {
@@ -162,7 +331,7 @@
             });
 
 
-            //BORRAr
+            //BORRAR
             return;
 
             let roomUrl = "https://panel.colaboras.cloud/room/newtalkroom#123";
@@ -210,6 +379,8 @@
         });
 
         $(document).ready(function() {
+            loadSession();
+            /*
             if (authToken) {
                  // If a token was already present (e.g., loaded from storage), show data view
                 showView(VIEW_DATA);
@@ -217,6 +388,7 @@
                  // Default: show login view
                 showView(VIEW_LOGIN);
             }
+                */
         });
     </script>
 </body>
