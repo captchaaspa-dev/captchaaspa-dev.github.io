@@ -253,7 +253,8 @@
 
                 const result = await remoteApiLogin(email, password);
 
-                console.log("remote result: " + result);
+                console.log("remote result:");
+                console.log(result);
 
                 if (result.success) {
                     authToken = result.token; // Store token in memory
