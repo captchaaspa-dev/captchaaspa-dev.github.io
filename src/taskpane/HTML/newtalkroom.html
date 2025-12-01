@@ -208,7 +208,8 @@
                     url: apiUrl,
                     dataType: 'json',
                     headers: {
-                        "Authorization": "Basic " + btoa(accountUsername + ":" + accountPassword)
+                        "Authorization": "Basic " + btoa(accountUsername + ":" + accountPassword),
+                        "Access-Control-Allow-Origin" : "*",
                     },
                     //data: '{ "comment" }',
                     success: function(data) {
