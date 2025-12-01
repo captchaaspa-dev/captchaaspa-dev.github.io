@@ -4,10 +4,10 @@
   xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
   xmlns:mailappor="http://schemas.microsoft.com/office/mailappversionoverrides" xsi:type="MailApp">
   <Id>{C341AD31-BF7A-4C1D-99F1-D2E5896BEB0A}</Id>
-  <Version>1.0.0.28</Version>
+  <Version>1.0.0.29</Version>
   <ProviderName>Colaboras Cloud</ProviderName>
   <DefaultLocale>es-es</DefaultLocale>
-  <DisplayName DefaultValue="Colaboras Cloud Add-in (v1.0.0.28)"/>
+  <DisplayName DefaultValue="Colaboras Cloud Add-in (v1.0.0.29)"/>
   <Description DefaultValue="Ejemplo de gestión remota del entorno Colaboras."/>
   <IconUrl DefaultValue="https://captchaaspa-dev.github.io/assets/colaboras.png"/>
   <HighResolutionIconUrl DefaultValue="https://captchaaspa-dev.github.io/assets/colaboras.png"/>

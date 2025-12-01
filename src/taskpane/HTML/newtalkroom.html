@@ -70,6 +70,11 @@
                     Crear nueva sala
                 </button>
             </form>
+            <form id="logout">
+                <button type="submit" id="logoutButton">
+                    Cerrar sesion
+                </button>
+            </form>
         </div>
     </div>
     <script>
@@ -338,6 +343,12 @@
             */
         }
 
+        async function doLogout() {
+            clearToken();
+            showView(VIEW_LOGIN);
+            return;
+        }
+
         async function doCreateNewTalkRoom() {
             if (!Office.context || !Office.context.mailbox || !Office.context.mailbox.item) {
                 console.log("Office.js not initialized or no item selected.");
@@ -429,6 +440,11 @@
             doLogin();
         });
 
+        $("#logoutButton").on("click", function(e) {
+            e.preventDefault();
+            doLogout();
+        });
+        
         $("#newTalkRoomButton").on("click", function(e) {
             e.preventDefault();
             doCreateNewTalkRoom();
