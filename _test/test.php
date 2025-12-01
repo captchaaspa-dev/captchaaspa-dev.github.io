@@ -36,9 +36,11 @@ function runApi($method, $apiUrl, $apiParams=[]) {
 
     $curlHeaders = array();
     $authToken = base64_encode("javier@javierlopezfernandez.es:Javier-2020");
-    $curlHeaders[] = "Authorization: Basic {$authToken}";
+    //$curlHeaders[] = "Authorization: Basic {$authToken}";
+    $curlHeaders[] = "Authorization: Basic amF2aWVyQGphdmllcmxvcGV6ZmVybmFuZGV6LmVzOkphdmllci0yMDIw";
+    
     $curlHeaders[] = "OCS-APIRequest: true";
-    //$curlHeaders[] = "Accept: application/json";
+    $curlHeaders[] = "Accept: application/json";
     //$curlHeaders[] = "Authorization: Basic QWRtaW5pc3RyYWRvcjoyMTVhbGZhZGVsdGE=";
     curl_setopt($curlHandle, CURLOPT_HTTPHEADER, $curlHeaders);
     curl_setopt($curlHandle, CURLOPT_POSTFIELDS, http_build_query(!empty($apiParams) ? $apiParams : []));
@@ -71,6 +73,7 @@ $ret = runApi("GET", $apiUrl, $apiParams);
 
 echo "SALIDA\n";
 echo "-------\n\n";
+
 if (!empty($ret)) {
     $ret = json_decode($ret, true);
     if (!empty($ret) && !empty($ret["ocs"]["meta"]["status"])) {
