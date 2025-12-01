@@ -209,12 +209,14 @@
                 jQuery.ajax({
                     type: "GET",
                     url: apiUrl,
+                    crossOrigin: true,
                     dataType: 'json',
                     headers: {
                         "Authorization": "Basic " + btoa(accountUsername + ":" + accountPassword),
                         "Access-Control-Allow-Origin" : "*",
                         "OCS-APIRequest": "true",
                         "Accept": "application/json",
+                        "Content-Type": "application/json",
                     },
                     //data: '{ "comment" }',
                     success: function(data) {

@@ -38,7 +38,7 @@ function runApi($method, $apiUrl, $apiParams=[]) {
     $authToken = base64_encode("javier@javierlopezfernandez.es:Javier-2020");
     $curlHeaders[] = "Authorization: Basic {$authToken}";
     $curlHeaders[] = "OCS-APIRequest: true";
-    $curlHeaders[] = "Accept: application/json";
+    //$curlHeaders[] = "Accept: application/json";
     //$curlHeaders[] = "Authorization: Basic QWRtaW5pc3RyYWRvcjoyMTVhbGZhZGVsdGE=";
     curl_setopt($curlHandle, CURLOPT_HTTPHEADER, $curlHeaders);
     curl_setopt($curlHandle, CURLOPT_POSTFIELDS, http_build_query(!empty($apiParams) ? $apiParams : []));
@@ -58,8 +58,8 @@ function runApi($method, $apiUrl, $apiParams=[]) {
 //$host = "https://clouddeb02.colaboras.cloud";
 //$host = "https://panel.colaboras.cloud";
 //$apiAction = "room";
-$apiUrl = "https://clouddeb02.colaboras.cloud/ocs/v2.php/apps/spreed/api/v4/room?clbdomain=javierlopezfernandez.es";
-//$apiUrl = "https://clouddeb02.colaboras.cloud/apps/spreed/api/v4/room?clbdomain=javierlopezfernandez.es";
+//$apiUrl = "https://clouddeb02.colaboras.cloud/ocs/v2.php/apps/spreed/api/v4/room?clbdomain=javierlopezfernandez.es";
+$apiUrl = "https://clouddeb02.colaboras.cloud/ocs/v2.php/apps/spreed/api/v4/room?clbdomain=aspa.cloud";
 $apiParams = [];
 
 
@@ -71,6 +71,20 @@ $ret = runApi("GET", $apiUrl, $apiParams);
 
 echo "SALIDA\n";
 echo "-------\n\n";
-echo print_r($ret, true);
+if (!empty($ret)) {
+    $ret = json_decode($ret, true);
+    if (!empty($ret) && !empty($ret["ocs"]["meta"]["status"])) {
+        switch ($ret["ocs"]["meta"]["status"]) {
+            case "failure":
+                echo "error!!";
+                break;
+            case "ok":
+                $data = $ret["ocs"]["data"];
+                echo print_r($data, true);
+                break;
+        }
+    }
+}
+
 echo "\n";
 echo "-------\n\n";
