@@ -188,13 +188,57 @@
         }
 
 
+        async function remoteApiLogin(accountUsername, accountPassword) {
+            if (accountUsername && accountPassword) {
+                //Generamos el auth token
+                //const authToken = btoa(accountUsername + ":" + accountPassword);
+                //Hacer post a talk para ver si da respuesta
+                const apiHost = "https://panel.colaboras.cloud";
+                const apiVersion = "1.0";
+                const apiCommand = "apps/spreed/api/" + apiVersion + "/room"; //GET
+                const apiUrl = apiHost + "/" + apiCommand;
+
+                jQuery.ajax({
+                    type: "GET",
+                    url: apiUrl,
+                    dataType: 'json',
+                    headers: {
+                        "Authorization": "Basic " + btoa(accountUsername + ":" + accountPassword)
+                    },
+                    //data: '{ "comment" }',
+                    success: function(data) {
+                        console.log("success!");
+                        console.log(data);
+                    },
+                    done: function(data) {
+                        console.log("done!");
+                        console.log(data);
+                    },
+                    error: function(data) {
+                        console.log("error!");
+                        console.log(data);
+                    },
+                    fail: function(data) {
+                        console.log("fail!");
+                        console.log(data);
+                    }
+                });
+
+                return { success: true, token: 'fake-jwt-token-12345-' + Date.now(), userId: "clb"+accountUsername };
+
+            }
+            return { success: false, message: 'Invalid credentials' };
+        }
+        /*
         async function remoteApiLogin(email, password) {
             //await new Promise(resolve => setTimeout(Math.random() * 800 + 400, resolve));
+            //if (email === 'test@outlook.com' && password === 'P@sswOrd1') {
             if (email === 'test@outlook.com' && password === 'P@sswOrd1') {
                 return { success: true, token: 'fake-jwt-token-12345-' + Date.now(), userId: 'user-001' };
             }
             return { success: false, message: 'Invalid credentials. Use test@outlook.com / P@sswOrd1' };
         }
+        */
 
 
         async function loadSession() {
