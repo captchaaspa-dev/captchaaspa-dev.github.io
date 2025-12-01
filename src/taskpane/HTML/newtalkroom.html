@@ -198,10 +198,11 @@
                 //Generamos el auth token
                 //const authToken = btoa(accountUsername + ":" + accountPassword);
                 //Hacer post a talk para ver si da respuesta
+                const accountDomain = "javierlopezfernandez.es";
                 const apiHost = "https://panel.colaboras.cloud";
-                const apiVersion = "1.0";
-                const apiCommand = "apps/spreed/api/" + apiVersion + "/room"; //GET
-                const apiUrl = apiHost + "/" + apiCommand;
+                const apiCommand ="v2.php/apps/spreed/api/v4/room";
+                //const apiCommand = "apps/spreed/api/" + apiVersion + "/room"; //GET
+                const apiUrl = apiHost + "/" + apiCommand + "?clbdomain=" + accountDomain;
 
                 jQuery.ajax({
                     type: "GET",
@@ -209,7 +210,9 @@
                     dataType: 'json',
                     headers: {
                         "Authorization": "Basic " + btoa(accountUsername + ":" + accountPassword),
-                        "Access-Control-Allow-Origin" : "*",
+                        //"Access-Control-Allow-Origin" : "*",
+                        "OCS-APIRequest": "true",
+                        "Accept": "application/json",
                     },
                     //data: '{ "comment" }',
                     success: function(data) {
