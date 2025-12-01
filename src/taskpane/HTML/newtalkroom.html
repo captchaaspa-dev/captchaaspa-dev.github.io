@@ -200,9 +200,11 @@
                 //Hacer post a talk para ver si da respuesta
                 const accountDomain = "javierlopezfernandez.es";
                 const apiHost = "https://panel.colaboras.cloud";
-                const apiCommand ="v2.php/apps/spreed/api/v4/room";
+                const apiCommand ="ocs/v2.php/apps/spreed/api/v4/room";
                 //const apiCommand = "apps/spreed/api/" + apiVersion + "/room"; //GET
                 const apiUrl = apiHost + "/" + apiCommand + "?clbdomain=" + accountDomain;
+
+                console.log("apiUrl:" + apiUrl);
 
                 jQuery.ajax({
                     type: "GET",
@@ -210,7 +212,7 @@
                     dataType: 'json',
                     headers: {
                         "Authorization": "Basic " + btoa(accountUsername + ":" + accountPassword),
-                        //"Access-Control-Allow-Origin" : "*",
+                        "Access-Control-Allow-Origin" : "*",
                         "OCS-APIRequest": "true",
                         "Accept": "application/json",
                     },
