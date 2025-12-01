@@ -61,7 +61,10 @@ function runApi($method, $apiUrl, $apiParams=[]) {
 //$host = "https://panel.colaboras.cloud";
 //$apiAction = "room";
 //$apiUrl = "https://clouddeb02.colaboras.cloud/ocs/v2.php/apps/spreed/api/v4/room?clbdomain=javierlopezfernandez.es";
-$apiUrl = "https://clouddeb02.colaboras.cloud/ocs/v2.php/apps/spreed/api/v4/room?clbdomain=aspa.cloud";
+//$apiUrl = "https://clouddeb02.colaboras.cloud/ocs/v2.php/apps/spreed/api/v4/room?clbdomain=aspa.cloud";
+$apiUrl = "https://clouddeb02.colaboras.cloud/ocs/v2.php/apps/user_status/api/v1/user_status?clbdomain=azn.es";
+
+
 $apiParams = [];
 
 
@@ -74,6 +77,7 @@ $ret = runApi("GET", $apiUrl, $apiParams);
 echo "SALIDA\n";
 echo "-------\n\n";
 
+/*
 if (!empty($ret)) {
     $ret = json_decode($ret, true);
     if (!empty($ret) && !empty($ret["ocs"]["meta"]["status"])) {
@@ -88,6 +92,8 @@ if (!empty($ret)) {
         }
     }
 }
+*/
+echo print_r($ret, true);
 
 echo "\n";
 echo "-------\n\n";
