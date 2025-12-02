@@ -193,8 +193,40 @@
         }
 
 
+        function normalizeBaseUrl(input){
+            if (!input)  {
+                return "";
+            }
+            return String(input).trim().replace(/\/+$/, "");
+        }
+
         async function remoteApiLogin(accountUsername, accountPassword) {
             if (accountUsername && accountPassword) {
+
+                const baseUrl = "http://panel.colaboras.cloud"
+                const normalizedBase = normalizeBaseUrl(baseUrl);
+                const clbDomain = accountUsername.split("@")[1];
+                const trimmedUser = typeof accountUsername === "string" ? accountUsername.trim() : "";
+                const password = typeof accountPassword === "string" ? accountPassword : "";
+
+                if (!normalizedBase || !trimmedUser || !password){
+                    return { success: false, message: 'Missing credentials' };
+                }
+
+                const basicHeader = "Basic " + btoa(trimmedUser + ":" + password);
+                const headers = {
+                    "OCS-APIRequest": "true",
+                    "Authorization": basicHeader,
+                    "Accept": "application/json"
+                };
+
+                const url = normalizedBase + "ocs/v2.php/apps/user_status/api/v1/user_status" + "?clbdomain=" + clbDomain;
+                const res = await fetch(url, { method:"GET", headers });
+                console.log(res);
+
+                return { success: true, message: 'Doing GET /ocs/user_status...' };
+            
+                /*
                 //Generamos el auth token
                 //const authToken = btoa(accountUsername + ":" + accountPassword);
                 //Hacer post a talk para ver si da respuesta
@@ -238,6 +270,7 @@
                         console.log(data);
                     }
                 });
+                */
 
                 return { success: true, token: 'fake-jwt-token-12345-' + Date.now(), userId: "clb"+accountUsername };
 
