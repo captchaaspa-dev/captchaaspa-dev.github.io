@@ -1,6 +1,7 @@
 
 
 function colaborasInit(eventObj) {
+    console.log("colaborasInit()!")
     display_insight_infobar();
 }
 
