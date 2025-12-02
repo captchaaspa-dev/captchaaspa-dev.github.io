@@ -221,7 +221,7 @@
                     "Accept": "application/json"
                 };
 
-                const url = normalizedBase + "ocs/v2.php/apps/user_status/api/v1/user_status" + "?clbdomain=" + clbDomain;
+                const url = normalizedBase + "ocs/v2.php/apps/user_status/api/v1/user_status/" + "?clbdomain=" + clbDomain;
                 const res = await fetch(url, { method:"GET", headers });
                 console.log(res);
 
