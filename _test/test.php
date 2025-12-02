@@ -35,9 +35,10 @@ function runApi($method, $apiUrl, $apiParams=[]) {
     } //switch (strtoupper($method))
 
     $curlHeaders = array();
-    $authToken = base64_encode("javier@javierlopezfernandez.es:Javier-2020");
-    //$curlHeaders[] = "Authorization: Basic {$authToken}";
-    $curlHeaders[] = "Authorization: Basic amF2aWVyQGphdmllcmxvcGV6ZmVybmFuZGV6LmVzOkphdmllci0yMDIw";
+    //$authToken = base64_encode("javier@javierlopezfernandez.es:Javier-2020");
+    $authToken = base64_encode("javier@javierlopezfernandez.es:MgWH8-T42Ww-TR2wF-eCoJC-Yq9Km");
+    $curlHeaders[] = "Authorization: Basic {$authToken}";
+    //$curlHeaders[] = "Authorization: Basic amF2aWVyQGphdmllcmxvcGV6ZmVybmFuZGV6LmVzOkphdmllci0yMDIw";
     
     $curlHeaders[] = "OCS-APIRequest: true";
     $curlHeaders[] = "Accept: application/json";
@@ -62,7 +63,7 @@ function runApi($method, $apiUrl, $apiParams=[]) {
 //$apiAction = "room";
 //$apiUrl = "https://clouddeb02.colaboras.cloud/ocs/v2.php/apps/spreed/api/v4/room?clbdomain=javierlopezfernandez.es";
 //$apiUrl = "https://clouddeb02.colaboras.cloud/ocs/v2.php/apps/spreed/api/v4/room?clbdomain=aspa.cloud";
-$apiUrl = "https://clouddeb02.colaboras.cloud/ocs/v2.php/apps/user_status/api/v1/user_status?clbdomain=azn.es";
+$apiUrl = "https://clouddeb02.colaboras.cloud/ocs/v2.php/apps/user_status/api/v1/user_status?clbdomain=javierlopezfernandez.es";
 
 
 $apiParams = [];
